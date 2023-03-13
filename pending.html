@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <title> Pending bets</title>
+  </head>
+  <body>
+    <script>
+      function pending(){
+        document.getElementById("result").innerHTML = "fetching data...";
+        var addr = document.getElementById("addr").value;
+        var pendingCall = new XMLHttpRequest();
+        pendingCall.open("GET", "https://api.purebet.io/pending/bets?bettorAddr=" + addr, false);
+        pendingCall.send();
+        var response = JSON.parse(pendingCall.response);
+        var pendingBets = response.body;
+        document.getElementById("result").innerHTML = JSON.stringify(pendingBets);
+      }
+    </script>
+    <h1> Enter address and click button </h1>
+    <input type = "text" id = "addr">
+    <button onclick = "pending()"> See pending bets of this address </button>
+    <div id = "result"> </div>
+    <h1> <a href = "https://replit.com/@purebet/api-example#pending.html" target = "_blank"> Source code </a> </h1>
+  </body>
+</html>

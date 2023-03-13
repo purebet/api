@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <title> Canceling bets</title>
+  </head>
+  <body>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script>
+      //go to helius.xyz for your own free solana rpc
+      var connection = new solanaWeb3.Connection("https://rpc.helius.xyz/?api-key=993f61eb-a21c-4033-818a-e2c2ebde7a98", "confirmed");
+      async function cancel(){
+        var betAddr = document.getElementById("betAddr").value;
+        var url = "https://api.purebet.io/cancel/bet?betAddr=" + betAddr;
+        var cancelCall = new XMLHttpRequest();
+        cancelCall.open("GET", url, false);
+        cancelCall.send(); 
+        var wireRaw = cancelCall.response;
+        var wireObj = JSON.parse(wireRaw);
+        var wire = wireObj.body;
+        if(wire.data == null){
+          document.getElementById("result").innerHTML = wire;
+          return;
+        }
+        var tx = solanaWeb3.Transaction.from(wire.data);
+        var signed = await window.phantom.solana.signTransaction(tx);
+        var signature = await connection.sendRawTransaction(signed.serialize());
+        await connection.confirmTransaction(signature);
+        document.getElementById("result").innerHTML = signature;
+      }
+      async function connect(){
+        await window.phantom.solana.connect();
+        document.getElementById('addr').innerHTML = window.phantom.solana.publicKey.toBase58();
+      }
+    </script>
+    <button onclick = "connect()"> Connect your phantom wallet </button>
+    <h1 id = "addr"> Your wallet address appears here </h1>
+    <h1> Enter the address of the bet you wish to cancel: </h1>
+    <input type = "text" id = "betAddr">
+    <button onclick = "cancel()"> Cancel this bet </button>
+    <h1 id = "result""> Transaction signature appears here </h1>
+    <h1> <a href = "https://replit.com/@purebet/api-example#cancel.html" target = "_blank"> Source code </a></h1>
+    <h2> Note: This helius rpc does not work on Microsoft Edge </h2>
+  </body>
+</html>

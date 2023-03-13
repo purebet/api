@@ -1,0 +1,58 @@
+<html>
+  <head>
+    <title> Placing bets</title>
+  </head>
+  <body>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script>
+      //go to https://helius.xyz for your own free solana rpc
+      var connection = new solanaWeb3.Connection("https://rpc.helius.xyz/?api-key=993f61eb-a21c-4033-818a-e2c2ebde7a98", "confirmed");
+      async function placeBet(){
+        var id1 = document.getElementById("id1").value;
+        var id2 = document.getElementById("id2").value;
+        var side = document.getElementById("side").value;
+        var stake = document.getElementById("stake").value;
+        var odds = document.getElementById("odds").value;
+        var url = "https://api.purebet.io/bets/betBuilder?id1=" + id1 + 
+          "&id2=" + id2 +
+          "&side=" + side + 
+          "&stake=" + stake + 
+          "&odds=" + odds + 
+          "&bettorAddr=" + window.phantom.solana.publicKey.toBase58();
+        var betCall = new XMLHttpRequest();
+        betCall.open("GET", url, false);
+        betCall.send(); 
+        var wireRaw = betCall.response;
+        var wireObj = JSON.parse(wireRaw);
+        var wire = wireObj.body;
+        var tx = solanaWeb3.Transaction.from(wire.data);
+        var signed = await window.phantom.solana.signTransaction(tx);
+        var signature = await connection.sendRawTransaction(signed.serialize());
+        await connection.confirmTransaction(signature);
+        document.getElementById("result").innerHTML = signature;
+      }
+      
+      async function connect(){
+        await window.phantom.solana.connect();
+        document.getElementById('addr').innerHTML = window.phantom.solana.publicKey.toBase58();
+      }
+    </script>
+    <button onclick = "connect()"> Connect to phantom wallet </button>
+    <h2 id = "addr"> Connnected Address will appear here </h2>
+    <h2> ID1 </h2>
+    <input type = "text" id = "id1">
+    <h2> ID2 </h2>
+    <input type = "text" id = "id2">
+    <h2> Side, enter one of (home, Back, over, away, Lay, under)</h2>
+    <input type = "text" id = "side">
+    <h2> Stake </h2>
+    <input type = "text" id = "stake">
+    <h2> Odds </h2>
+    <input type = "text" id = "odds">
+    <h2> Place bet, make sure to connect phantom wallet first </h2>
+    <button onclick = "placeBet()"> Place Bet! </button>
+    <h1 id = "result">Signature will appear here</h1>
+    <h1> <a href = "https://replit.com/@purebet/api-example#bets.html" target = "_blank"> Source code </a> </h1>
+    <h3> Note: the RPC (helius) used for this example does not work on Microsoft Edge. </h3>
+  </body>
+</html>
