@@ -25,7 +25,7 @@
         var wireRaw = betCall.response;
         var wireObj = JSON.parse(wireRaw);
         var wire = wireObj.body;
-        var tx = solanaWeb3.Transaction.from(wire.data);
+        var tx = solanaWeb3.Transaction.from(wire);
         var signed = await window.phantom.solana.signTransaction(tx);
         var signature = await connection.sendRawTransaction(signed.serialize());
         await connection.confirmTransaction(signature);
